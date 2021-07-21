@@ -1,2 +1,2 @@
 class Condition:
-    intent : str = None
+    intent: str = None

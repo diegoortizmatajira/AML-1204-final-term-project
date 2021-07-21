@@ -7,11 +7,11 @@ from json_structure.variable import Variable
 
 
 class Workspace:
-    actions: list[Action]
-    intents: list[Intent]
-    entities: list[Entity]
-    metadata: Metadata
-    variables: list[Variable]
+    actions: list[Action] = []
+    intents: list[Intent] = []
+    entities: list[Entity] = []
+    metadata: Metadata = Metadata()
+    variables: list[Variable] = []
     counterexamples: [] = []
-    system_settings: SystemSettings
+    system_settings: SystemSettings = SystemSettings()
     learning_opt_out: bool = False
