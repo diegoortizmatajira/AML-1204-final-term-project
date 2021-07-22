@@ -22,11 +22,11 @@ class ExcelHeader:
     selection_continuation_message: str = 'There are other options that may help you...'
     formal_offering_message: str = 'Can I help you with anything else?'
     final_message: str = 'Thank you for using this chat, hope to see you soon'
-
+    feedback_message: str = 'Please provide feedback... Was the answer I gave you useful?'
 
 
 def load_excel_file(filename: str) -> (list[ExcelInput], ExcelHeader):
-    wb = load_workbook(filename = filename, data_only=True)
+    wb = load_workbook(filename=filename, data_only=True)
     ws = wb['Q&A']
 
     excel_rows_list = []

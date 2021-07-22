@@ -5,4 +5,4 @@ class OptionValueInput:
 
 class OptionValue:
     def __init__(self, text):
-        self.input: OptionValueInput = OptionValueInput()
+        self.input: OptionValueInput = OptionValueInput(text)

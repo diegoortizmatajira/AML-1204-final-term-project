@@ -5,7 +5,7 @@ from json_structure.output_value import OutputValue
 class GenericOutput:
     def __init__(self):
         self.values: list[OutputValue] = []
-        self.option: list[Option] = []
+        self.options: list[Option] = []
         self.response_type: str = None
-        self.selection_policy: str = 'sequential'
-        self.repeat_on_reprompt: bool = True
+        self.selection_policy: str = None
+        self.repeat_on_reprompt: bool = None

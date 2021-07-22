@@ -1,5 +1,5 @@
 class EntityValue:
-    def __init__(self):
+    def __init__(self, value: str, synonyms: list[str]):
         self.type: str = 'synonyms'
-        self.value: str = None
-        self.synonyms: list[str] = []
+        self.value: str = value
+        self.synonyms: list[str] = synonyms
