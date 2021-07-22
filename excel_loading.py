@@ -1,6 +1,4 @@
-#You will first need to install the 'xlrd' package
-
-import xlrd
+from openpyxl import load_workbook
 
 class ExcelInput:
     Row = ''
@@ -16,25 +14,23 @@ class ExcelInput:
 
 
 def load_excel_file(filename: str) -> list[ExcelInput]:
-    wb = xlrd.open_workbook(filename)
-    sh = wb.sheet_by_index(0)
+    wb = load_workbook(filename = filename, data_only=True)
+    ws = wb['Q&A']
 
     excel_rows_list = []
 
-    for row_num in range(1, sh.nrows):
-        row_values = sh.row_values(row_num)
-
+    for row in ws.iter_rows():
         excelInputElement = ExcelInput()
-        excelInputElement.Row = row_values[0]
-        excelInputElement.Category_1 = row_values[1]
-        excelInputElement.Category_2 = row_values[2]
-        excelInputElement.Category_3 = row_values[3]
-        excelInputElement.Category_4 = row_values[4]
-        excelInputElement.Category_5 = row_values[5]
-        excelInputElement.Question = row_values[6]
-        excelInputElement.Answer = row_values[7]
-        excelInputElement.Show_in_menu = row_values[8]
-        excelInputElement.Validation = row_values[9]
+        excelInputElement.Row = row[0].value
+        excelInputElement.Category_1 = row[1].value
+        excelInputElement.Category_2 = row[2].value
+        excelInputElement.Category_3 = row[3].value
+        excelInputElement.Category_4 = row[4].value
+        excelInputElement.Category_5 = row[5].value
+        excelInputElement.Question = row[6].value
+        excelInputElement.Answer = row[7].value
+        excelInputElement.Show_in_menu = row[8].value
+        excelInputElement.Validation = row[9].value
         excel_rows_list.append(excelInputElement)
 
     return excel_rows_list
