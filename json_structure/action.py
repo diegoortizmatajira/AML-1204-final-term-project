@@ -9,12 +9,12 @@ from json_structure.text_expression import TextExpression
 
 
 class Action:
-    def __init__(self, title: str, action: str):
+    def __init__(self, title: str, action: str, condition: Condition):
         self.steps: list[Step] = []
         self.title: str = title
         self.action: str = action
         self.handlers: list[str] = []
-        self.condition: Condition = Condition()
+        self.condition: Condition = condition
         self.variables: list[ActionVariable] = []
         self.next_action: str = None
         self.disambiguation_opt_out: bool = False
