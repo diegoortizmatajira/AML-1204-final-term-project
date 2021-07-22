@@ -1,11 +1,11 @@
 class ScalarTextExpression:
-    scalar: str = None
+    def __init__(self, scalar: str):
+        self.scalar: str = scalar
 
 
 class TextExpression:
-    concat: list[ScalarTextExpression] = []
+    def __init__(self):
+        self.concat: list[ScalarTextExpression] = []
 
     def add_scalar(self, scalar: str):
-        new_scalar = ScalarTextExpression()
-        new_scalar.scalar = scalar
-        self.concat.append(new_scalar)
+        self.concat.append(ScalarTextExpression(scalar))

@@ -1,7 +1,9 @@
 class IntentExamples:
-    text: str = None
+    def __init__(self):
+        self.text: str = None
 
 
 class Intent:
-    intent: str = None
-    examples: list[IntentExamples] = []
+    def __init__(self):
+        self.intent: str = None
+        self.examples: list[IntentExamples] = []

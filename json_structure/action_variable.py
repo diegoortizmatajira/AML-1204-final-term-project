@@ -1,3 +1,4 @@
 class ActionVariable:
-    title: str = None
-    variable: str = None
+    def __init__(self):
+        self.title: str = None
+        self.variable: str = None

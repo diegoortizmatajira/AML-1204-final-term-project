@@ -4,11 +4,12 @@ from json_structure.step import Step
 
 
 class Action:
-    steps: list[Step] = []
-    title: str = None
-    action: str = None
-    handlers: list[str] = []
-    condition: Condition = Condition()
-    variables: list[ActionVariable] = []
-    next_action: str = None
-    disambiguation_opt_out: bool = False
+    def __init__(self, title, action):
+        self.steps: list[Step] = []
+        self.title: str = title
+        self.action: str = action
+        self.handlers: list[str] = []
+        self.condition: Condition = Condition()
+        self.variables: list[ActionVariable] = []
+        self.next_action: str = None
+        self.disambiguation_opt_out: bool = False

@@ -2,12 +2,14 @@ from json_structure.step_output import StepOutput
 
 
 class StepResolver:
-    type: str = None
+    def __init__(self):
+        self.type: str = None
 
 
 class Step:
-    step: str = None
-    output: StepOutput = StepOutput()
-    handlers: list[str] = []
-    resolver: StepResolver = StepResolver()
-    variable: str = None
+    def __init__(self, step):
+        self.step: str = step
+        self.output: StepOutput = StepOutput()
+        self.handlers: list[str] = []
+        self.resolver: StepResolver = StepResolver()
+        self.variable: str = None

@@ -1,6 +1,8 @@
 class OptionValueInput:
-    text: str = None
+    def __init__(self, text):
+        self.text: str = text
 
 
 class OptionValue:
-    input: OptionValueInput = OptionValueInput()
+    def __init__(self, text):
+        self.input: OptionValueInput = OptionValueInput()

@@ -1,2 +1,3 @@
 class Variable:
-    variable: str = None
+    def __init__(self):
+        self.variable: str = None

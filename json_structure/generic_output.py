@@ -3,8 +3,9 @@ from json_structure.output_value import OutputValue
 
 
 class GenericOutput:
-    values: list[OutputValue] = []
-    option: list[Option] = []
-    response_type: str = None
-    selection_policy: str = 'sequential'
-    repeat_on_reprompt: bool = True
+    def __init__(self):
+        self.values: list[OutputValue] = []
+        self.option: list[Option] = []
+        self.response_type: str = None
+        self.selection_policy: str = 'sequential'
+        self.repeat_on_reprompt: bool = True

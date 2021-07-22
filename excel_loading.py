@@ -1,6 +1,7 @@
-#You will first need to install the 'xlrd' package
+# You will first need to install the 'xlrd' package
 
 import xlrd
+
 
 class ExcelInput:
     Row = ''
@@ -15,7 +16,17 @@ class ExcelInput:
     Validation = ''
 
 
-def load_excel_file(filename: str) -> list[ExcelInput]:
+class ExcelHeader:
+    name: str = 'Sample chatbot'
+    description: str = 'This is a sample chatbot'
+    welcome_message: str = 'Hello, how can I help you?'
+    selection_message: str = 'Please tell me which option fits your question?'
+    selection_continuation_message: str = 'There are other options that may help you...'
+    formal_offering_message: str = 'Can I help you with anything else?'
+    final_message: str = 'Thank you for using this chat, hope to see you soon'
+
+
+def load_excel_file(filename: str) -> (list[ExcelInput], ExcelHeader):
     wb = xlrd.open_workbook(filename)
     sh = wb.sheet_by_index(0)
 
@@ -37,4 +48,4 @@ def load_excel_file(filename: str) -> list[ExcelInput]:
         excelInputElement.Validation = row_values[9]
         excel_rows_list.append(excelInputElement)
 
-    return excel_rows_list
+    return excel_rows_list, ExcelHeader()

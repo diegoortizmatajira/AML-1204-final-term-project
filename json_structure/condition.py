@@ -1,2 +1,3 @@
 class Condition:
-    intent: str = None
+    def __init__(self):
+        self.intent: str = None
