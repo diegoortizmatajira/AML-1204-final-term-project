@@ -40,9 +40,33 @@ def add_question(result: Skill, question: ExcelInput):
     question_intent = Intent(intent_name, [question.Question])
     result.workspace.intents.append(question_intent)
 
-    question_action = Action(question_name, question_name, condition=Condition(intent=intent_name))
-    question_action.add_response_text(get_step_name(), question.Answer)
+    question_action = Action(question.Question, question_name, condition=Condition(intent=intent_name))
+    question_action.add_response_text_expression(get_step_name(), question.Answer)
     result.workspace.actions.append(question_action)
+
+
+def add_menu(result: Skill, questions: list[ExcelInput]):
+    print('do something')
+    # I have to iterate through the different values in Category_1
+    # for each value create an intention with the value
+    # create an action to display options with the values of Category_2 related to category_1
+    menu_intent = Intent('menu_intent', ['Category 1'])
+    result.workspace.intents.append(menu_intent)
+
+    menu_entity = Entity('options_category_1', [
+        EntityValue('Subcategory 1', []),
+        EntityValue('Subcategory 2', []),
+        EntityValue('question 1', [])
+    ])
+    result.workspace.entities.append(menu_entity)
+
+    menu_action = Action('namexxx', 'namexxx', condition=Condition(intent='menu_intent'))
+    menu_action.add_response_options(get_step_name(), 'Please select one option', [
+        Option('Subcategory 1', 'Subcategory 1'),
+        Option('Subcategory 2', 'Subcategory 2'),
+        Option('question 1', 'question 1'),
+    ], 'options_category_1')
+    result.workspace.actions.append(menu_action)
 
 
 def generate_skill(questions: list[ExcelInput], header: ExcelHeader) -> Skill:
@@ -50,4 +74,5 @@ def generate_skill(questions: list[ExcelInput], header: ExcelHeader) -> Skill:
     add_welcome_dialog(result, header)
     for question in questions:
         add_question(result, question)
+    add_menu(result, questions)
     return result

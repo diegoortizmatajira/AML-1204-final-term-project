@@ -10,9 +10,9 @@ class Step:
     def __init__(self, step):
         self.step: str = step
         self.output: StepOutput = StepOutput()
-        self.handlers = None
+        self.handlers = []
         self.resolver: StepResolver = StepResolver()
-        self.variable: str = None
+        self.variable: str = step
         self.question = None
 
     def add_default_option_settings(self, entity: str):

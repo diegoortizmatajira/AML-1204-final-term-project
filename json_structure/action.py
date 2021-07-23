@@ -27,6 +27,19 @@ class Action:
             step.output.generic.append(generic_response)
             step.resolver.type = 'continue'
             self.steps.append(step)
+            self.variables.append(ActionVariable(step_name))
+
+    def add_response_text_expression(self, step_name: str, text: str):
+        if text:
+            step = Step(step_name)
+            generic_response = GenericOutput()
+            generic_response.values.append(OutputValue(text_expression=TextExpression([text])))
+            generic_response.response_type = 'text'
+            generic_response.selection_policy = 'sequential'
+            step.output.generic.append(generic_response)
+            step.resolver.type = 'continue'
+            self.steps.append(step)
+            self.variables.append(ActionVariable(step_name))
 
     def add_response_options(self, step_name: str, text: str, options: list[Option], options_entity: str):
         if text:
@@ -46,3 +59,4 @@ class Action:
             step.resolver.type = 'continue'
             step.add_default_option_settings(options_entity)
             self.steps.append(step)
+            self.variables.append(ActionVariable(step_name))

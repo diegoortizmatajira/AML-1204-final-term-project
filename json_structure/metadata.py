@@ -7,3 +7,4 @@ class MetaDataApiVersion:
 class Metadata:
     def __init__(self):
         self.apiversion: MetaDataApiVersion = MetaDataApiVersion()
+        self.api_version: MetaDataApiVersion = MetaDataApiVersion()
