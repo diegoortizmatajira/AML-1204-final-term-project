@@ -2,7 +2,6 @@ from json_structure.action_variable import ActionVariable
 from json_structure.condition import Condition
 from json_structure.generic_output import GenericOutput
 from json_structure.option import Option
-from json_structure.option_value import OptionValue
 from json_structure.output_value import OutputValue
 from json_structure.step import Step
 from json_structure.text_expression import TextExpression
@@ -29,7 +28,7 @@ class Action:
             step.resolver.type = 'continue'
             self.steps.append(step)
 
-    def add_response_options(self, step_name: str, text: str, options: list[Option]):
+    def add_response_options(self, step_name: str, text: str, options: list[Option], options_entity: str):
         if text:
             step = Step(step_name)
             # Adds the text before showing the options
@@ -45,4 +44,5 @@ class Action:
             generic_options_response.repeat_on_reprompt = True
             step.output.generic.append(generic_options_response)
             step.resolver.type = 'continue'
+            step.add_default_option_settings(options_entity)
             self.steps.append(step)
