@@ -39,7 +39,7 @@ class GenericOptionsOutput(GenericOutput):
     def __init__(self, title: str, options: list[OptionResponse]):
         GenericOutput.__init__(self, GENERIC_TYPE_OPTION)
         self.title = title
-        self.option: list[OptionResponse] = options
+        self.options: list[OptionResponse] = options
 
 
 class DialogOutput:
@@ -61,7 +61,7 @@ class DialogNodeNextStep:
 
 class DialogNode:
     def __init__(self, node_id: str, title: str, node_type: str):
-        self.id = node_id
+        self.dialog_node = node_id
         self.title = utils.clean_value(title)
         self.type = node_type
         self.parent = None

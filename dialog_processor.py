@@ -28,7 +28,7 @@ def add_initial_dialog(result: Skill, header: ExcelHeader) -> (str, str):
     result.entities.append(service_feedback_entity)
 
     service_feedback_node = StandardDialogNode(get_node_id(), 'Service feedback', '')
-    service_feedback_node.previous_sibling = welcome_dialog_node.id
+    service_feedback_node.previous_sibling = welcome_dialog_node.dialog_node
     service_feedback_node.add_response_options("Was the answer you received useful?", [
         OptionResponse("Yes", "Useful"),
         OptionResponse("No", "Not useful")
@@ -42,7 +42,7 @@ def add_initial_dialog(result: Skill, header: ExcelHeader) -> (str, str):
 
     formal_query_node = StandardDialogNode(get_node_id(), header.formal_offering_message,
                                            f"@{formal_query_entity.entity}")
-    formal_query_node.parent = service_feedback_node.id
+    formal_query_node.parent = service_feedback_node.dialog_node
     formal_query_node.add_response_options(header.formal_offering_message, [
         OptionResponse("Menu", "Menu"),
         OptionResponse("No, thank you..", "Finish")
@@ -50,11 +50,11 @@ def add_initial_dialog(result: Skill, header: ExcelHeader) -> (str, str):
     result.dialog_nodes.append(formal_query_node)
 
     finish_node = StandardDialogNode(get_node_id(), "Finish", f"@{formal_query_entity.entity}:Finish")
-    finish_node.parent = formal_query_node.id
+    finish_node.parent = formal_query_node.dialog_node
     finish_node.add_response_paragraph(header.final_message)
     result.dialog_nodes.append(finish_node)
 
-    return service_feedback_node.id, service_feedback_node.id
+    return service_feedback_node.dialog_node, service_feedback_node.dialog_node
 
 
 def add_not_understanding_dialog(result: Skill, previous_sibling_id: str):
@@ -72,7 +72,7 @@ def add_menu_folder(result: Skill, previous_sibling_id: str):
     new_folder_node = FolderDialogNode(get_node_id(), "Folder for menu dialog nodes")
     new_folder_node.previous_sibling = previous_sibling_id;
     result.dialog_nodes.append(new_folder_node);
-    return new_folder_node.id, new_folder_node.id
+    return new_folder_node.dialog_node, new_folder_node.dialog_node
 
 
 def generate_dialog_skill(questions: list[ExcelInput], header: ExcelHeader) -> Skill:
