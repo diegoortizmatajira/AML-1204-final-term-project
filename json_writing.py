@@ -1,5 +1,6 @@
 import json
-from json_structure.skill import Skill
+
+from dialog_skill.skill import Skill
 
 
 def write_json_skill(skill: Skill, output_file: str):
