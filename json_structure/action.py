@@ -5,12 +5,13 @@ from json_structure.option import Option
 from json_structure.output_value import OutputValue
 from json_structure.step import Step
 from json_structure.text_expression import TextExpression
+from utils import clean_title
 
 
 class Action:
     def __init__(self, title: str, action: str, condition: Condition):
         self.steps: list[Step] = []
-        self.title: str = title
+        self.title: str = clean_title(title)
         self.action: str = action
         self.handlers: list[str] = []
         self.condition: Condition = condition
@@ -22,7 +23,7 @@ class Action:
         if text:
             step = Step(step_name)
             generic_response = GenericOutput()
-            generic_response.values.append(OutputValue(text=text))
+            generic_response.values = [OutputValue(text=text)]
             generic_response.response_type = 'text'
             step.output.generic.append(generic_response)
             step.resolver.type = 'continue'
@@ -33,20 +34,20 @@ class Action:
         if text:
             step = Step(step_name)
             generic_response = GenericOutput()
-            generic_response.values.append(OutputValue(text_expression=TextExpression([text])))
+            generic_response.values = [OutputValue(text_expression=TextExpression([text]))]
             generic_response.response_type = 'text'
             generic_response.selection_policy = 'sequential'
             step.output.generic.append(generic_response)
             step.resolver.type = 'continue'
             self.steps.append(step)
-            self.variables.append(ActionVariable(step_name))
+            self.variables.append(ActionVariable(step_name, title=text))
 
     def add_response_options(self, step_name: str, text: str, options: list[Option], options_entity: str):
         if text:
             step = Step(step_name)
             # Adds the text before showing the options
             generic_text_response = GenericOutput()
-            generic_text_response.values.append(OutputValue(text_expression=TextExpression([text])))
+            generic_text_response.values = [OutputValue(text_expression=TextExpression([text]))]
             generic_text_response.response_type = 'text'
             generic_text_response.selection_policy = 'sequential'
             step.output.generic.append(generic_text_response)
