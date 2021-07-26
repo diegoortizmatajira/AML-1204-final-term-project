@@ -27,14 +27,15 @@ def get_question_name() -> str:
     return f'question_{question_count:04d}'
 
 
-def add_welcome_dialog(result: Skill, header: ExcelHeader):
+def add_welcome_dialog(result: Skill, header: ExcelHeader, next_action: str):
     # Adds the standard greeting
     welcome_action = Action('Greet customer', 'welcome', Condition(expression='welcome'))
     welcome_action.add_response_text(get_step_name(), header.welcome_message)
+    welcome_action.next_action = next_action
     result.workspace.actions.append(welcome_action)
 
 
-def add_question(result: Skill, question: ExcelInput):
+def add_question(result: Skill, question: ExcelInput, next_action: str):
     question_name = get_question_name()
     intent_name = question_name
     question_intent = Intent(intent_name, [question.Question])
@@ -42,6 +43,7 @@ def add_question(result: Skill, question: ExcelInput):
 
     question_action = Action(question.Question, question_name, condition=Condition(intent=intent_name))
     question_action.add_response_text_expression(get_step_name(), question.Answer)
+    question_action.next_action = next_action
     result.workspace.actions.append(question_action)
 
 
@@ -68,11 +70,13 @@ def add_menu(result: Skill, questions: list[ExcelInput]):
     ], 'options_category_1')
     result.workspace.actions.append(menu_action)
 
+    return menu_action.action
+
 
 def generate_skill(questions: list[ExcelInput], header: ExcelHeader) -> Skill:
     result = Skill(header.name, header.description)
-    add_welcome_dialog(result, header)
+    main_menu = add_menu(result, questions)
+    add_welcome_dialog(result, header, main_menu)
     for question in questions:
-        add_question(result, question)
-    add_menu(result, questions)
+        add_question(result, question, main_menu)
     return result

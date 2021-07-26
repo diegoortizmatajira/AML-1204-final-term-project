@@ -17,7 +17,7 @@ class Action:
         self.condition: Condition = condition
         self.variables: list[ActionVariable] = []
         self.next_action: str = None
-        self.disambiguation_opt_out: bool = False
+        self.disambiguation_opt_out: bool = None
 
     def add_response_text(self, step_name: str, text: str):
         if text:
@@ -41,6 +41,7 @@ class Action:
             step.resolver.type = 'continue'
             self.steps.append(step)
             self.variables.append(ActionVariable(step_name, title=text))
+            self.disambiguation_opt_out = False
 
     def add_response_options(self, step_name: str, text: str, options: list[Option], options_entity: str):
         if text:
@@ -60,4 +61,5 @@ class Action:
             step.resolver.type = 'continue'
             step.add_default_option_settings(options_entity)
             self.steps.append(step)
-            self.variables.append(ActionVariable(step_name))
+            self.variables.append(ActionVariable(step_name, title=text))
+            self.disambiguation_opt_out = False
