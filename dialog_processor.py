@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 
 from dialog_skill.dialog_node import StandardDialogNode, GenericOptionsOutput, OptionResponse, FolderDialogNode, \
     DialogNode
@@ -99,8 +99,10 @@ def add_main_menu(result: Skill, previous_sibling_id: str, header: ExcelHeader) 
 
 
 class ProcessingContext:
-    def __init__(self, level: int, parent_node: DialogNode, previous_sibling_id: str, menu_node: DialogNode,
-                 menu_entity: Entity, formal_query_id: str, menu_folder_id: str, previous_menu_id: str):
+    def __init__(self, level: int, parent_node: DialogNode, previous_sibling_id: Optional[str],
+                 menu_node: Optional[DialogNode],
+                 menu_entity: Optional[Entity], formal_query_id: str, menu_folder_id: str,
+                 previous_menu_id: Optional[str]):
         self.level = level
         self.parent_node = parent_node
         self.previous_sibling_id = previous_sibling_id
