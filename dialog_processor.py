@@ -1,23 +1,41 @@
 from typing import Callable, Optional
 
-from dialog_skill.dialog_node import StandardDialogNode, GenericOptionsOutput, OptionResponse, FolderDialogNode, \
-    DialogNode
+from dialog_skill.dialog_node import StandardDialogNode, OptionResponse, FolderDialogNode, \
+    DialogNode, DialogNodeNextStep
 from dialog_skill.entity import Entity, EntityValue, ENTITY_VALUE_TYPE_SYNONYMS
 from dialog_skill.intent import Intent
 from dialog_skill.skill import Skill
 from excel_loading import ExcelHeader, ExcelInput
 
-contadorPreguntas = 0
-contadorMenus = 0
-contadorIntencionesMenus = 0
-idNodoEnlaceMenuPredecesor = None
 node_count = 0
+menu_intent_count = 0
+menu_count = 0
+question_count = 0
+previous_menu_link_id = None
 
 
 def get_node_id() -> str:
     global node_count
     node_count = node_count + 1
     return f'node_{node_count:04d}'
+
+
+def get_menu_id() -> str:
+    global menu_count
+    menu_count = menu_count + 1
+    return f'menu_option_{menu_count:04d}'
+
+
+def get_menu_intent_id() -> str:
+    global menu_intent_count
+    menu_intent_count = menu_intent_count + 1
+    return f'menu_intent_{menu_intent_count:04d}'
+
+
+def get_question_intent_id() -> str:
+    global question_count
+    question_count = question_count + 1
+    return f'question_intent_{question_count:04d}'
 
 
 def add_initial_dialog(result: Skill, header: ExcelHeader) -> (str, str):
@@ -74,33 +92,33 @@ def add_not_understanding_dialog(result: Skill, previous_sibling_id: str):
 
 def add_menu_folder(result: Skill, previous_sibling_id: str):
     new_folder_node = FolderDialogNode(get_node_id(), "Folder for menu dialog nodes")
-    new_folder_node.previous_sibling = previous_sibling_id;
-    result.dialog_nodes.append(new_folder_node);
+    new_folder_node.previous_sibling = previous_sibling_id
+    result.dialog_nodes.append(new_folder_node)
     return new_folder_node.dialog_node, new_folder_node.dialog_node
 
 
 def add_main_menu(result: Skill, previous_sibling_id: str, header: ExcelHeader) -> (str, DialogNode, Entity):
-    main_menu_intention = Intent("Main Menu", "Intention to view the main menu", [
+    main_menu_intention = Intent(get_menu_intent_id(), "Intention to view the main menu", [
         "Menu",
         "What can you do?",
         "How can you help me?"
     ])
     result.intents.append(main_menu_intention)
 
-    main_menu_node = StandardDialogNode(get_node_id(), "Main Menu", f"#{main_menu_intention.name}")
+    main_menu_node = StandardDialogNode(get_node_id(), "Main Menu", f"#{main_menu_intention.intent}")
     main_menu_node.PreviousSiblingId = previous_sibling_id
     main_menu_node.add_response_options(header.selection_message, [])
     result.dialog_nodes.append(main_menu_node)
 
-    main_menu_entity = Entity("Opciones_Menu_Principal", [], True)
+    main_menu_entity = Entity('main_menu_options', [], True)
     result.entities.append(main_menu_entity)
 
-    return main_menu_node.dialog_node, main_menu_node, main_menu_entity;
+    return main_menu_node.dialog_node, main_menu_node, main_menu_entity
 
 
 class ProcessingContext:
-    def __init__(self, level: int, parent_node: DialogNode, previous_sibling_id: Optional[str],
-                 menu_node: Optional[DialogNode],
+    def __init__(self, level: int, parent_node: Optional[DialogNode], previous_sibling_id: Optional[str],
+                 menu_node: Optional[StandardDialogNode],
                  menu_entity: Optional[Entity], formal_query_id: str, menu_folder_id: str,
                  previous_menu_id: Optional[str]):
         self.level = level
@@ -113,14 +131,14 @@ class ProcessingContext:
         self.previous_menu_id = previous_menu_id
 
     def new_folder_context(self, new_folder: str):
-        NuevoFolder = FolderDialogNode(get_node_id(), new_folder)
+        new_folder_node = FolderDialogNode(get_node_id(), new_folder)
         if self.parent_node:
-            NuevoFolder.parent = self.parent_node
-        NuevoFolder.previous_sibling = self.previous_sibling_id
+            new_folder_node.parent = self.parent_node.dialog_node
+        new_folder_node.previous_sibling = self.previous_sibling_id
 
         return ProcessingContext(
             level=self.level + 1,
-            parent_node=NuevoFolder,
+            parent_node=new_folder_node,
             previous_sibling_id=None,
             menu_node=None,
             menu_entity=None,
@@ -129,8 +147,20 @@ class ProcessingContext:
             previous_menu_id=None
         )
 
+    def new_finish_context(self):
+        return ProcessingContext(
+            level=99999,
+            parent_node=self.parent_node,
+            previous_sibling_id=self.previous_sibling_id,
+            menu_node=self.menu_node,
+            menu_entity=self.menu_entity,
+            previous_menu_id=None,
+            formal_query_id=self.formal_query_id,
+            menu_folder_id=self.menu_folder_id
+        )
 
-def get_grouping_criteria(level: int) -> Callable[[ExcelInput], str]:
+
+def get_grouping_criteria(level: int) -> Optional[Callable[[ExcelInput], str]]:
     if level == 1:
         return lambda row: row.Category_1
     elif level == 2:
@@ -155,7 +185,38 @@ def get_groups(questions: list[ExcelInput], criteria: Callable[[ExcelInput], str
     return result
 
 
-def process_level(result: Skill, questions: list[ExcelInput], context: ProcessingContext) -> str:
+def has_menu_options(questions: list[ExcelInput]) -> bool:
+    for question in questions:
+        if not question.Show_in_menu:
+            return False
+    return True
+
+
+def create_menu(result: Skill, header: ExcelHeader, menu_name: str, context: ProcessingContext) -> (DialogNode, Entity):
+    context.menu_entity.values.append(EntityValue(ENTITY_VALUE_TYPE_SYNONYMS, menu_name, []))
+    context.menu_node.add_options_to_last_response(menu_name, header.selection_continuation_message)
+
+    menu_node = StandardDialogNode(get_node_id(), menu_name, f'@{context.menu_entity.entity}:{menu_name}')
+    menu_node.parent = context.menu_node.dialog_node
+    menu_node.previous_sibling = context.previous_menu_id
+    menu_node.add_response_options(header.selection_message, [])
+    result.dialog_nodes.append(menu_node)
+
+    menu_entity = Entity(get_menu_id(), [])
+    result.entities.append(menu_entity)
+
+    return menu_node, menu_entity
+
+
+def clean_skill_empty_nodes(result: Skill) -> Skill:
+    for entity in result.entities[:]:
+        if len(entity.values) == 0:
+            result.entities.remove(entity)
+    return result
+
+
+def process_level(result: Skill, questions: list[ExcelInput], header: ExcelHeader, context: ProcessingContext) -> str:
+    global previous_menu_link_id
     criteria = get_grouping_criteria(context.level)
     if criteria:
         # Get the questions grouped by the values in the category column corresponding to the level
@@ -164,8 +225,44 @@ def process_level(result: Skill, questions: list[ExcelInput], context: Processin
             if key:
                 new_folder_context = context.new_folder_context(key)
                 result.dialog_nodes.append(new_folder_context.parent_node)
+                if context.menu_node and context.menu_entity and has_menu_options(group_list):
+                    new_folder_context.menu_node, new_folder_context.menu_entity = create_menu(result, header, key,
+                                                                                               context)
+                    context.previous_menu_id = new_folder_context.menu_node.dialog_node
+                menu_intention = Intent(get_menu_intent_id(), key, [key])
+                result.intents.append(menu_intention)
 
-    return ''
+                link_node = StandardDialogNode(get_node_id(), key, f'#{menu_intention.intent}')
+                link_node.parent = new_folder_context.menu_folder_id
+                link_node.previous_sibling = previous_menu_link_id
+                link_node.next_step = DialogNodeNextStep(new_folder_context.menu_node.dialog_node)
+                result.dialog_nodes.append(link_node)
+                previous_menu_link_id = link_node.dialog_node
+
+                process_level(result, group_list, header, new_folder_context)
+                if new_folder_context.parent_node:
+                    context.previous_sibling_id = new_folder_context.parent_node.dialog_node
+            else:
+                context.previous_sibling_id = process_level(result, group_list, header, context.new_finish_context())
+    else:
+        # If there is no grouping criteria, it creates the questions
+        for question in questions:
+            if context.menu_node and context.menu_entity and question.Show_in_menu:
+                context.menu_node.add_options_to_last_response(question.Question, header.selection_continuation_message)
+
+            question_intent = Intent(get_question_intent_id(), question.Question, [question.Question])
+            result.intents.append(question_intent)
+
+            answer_node = StandardDialogNode(get_node_id(), question.Question, f'#{question_intent.intent}')
+            answer_node.add_response_paragraph(question.Answer)
+            if context.parent_node:
+                answer_node.parent = context.parent_node.dialog_node
+            answer_node.previous_sibling = context.previous_sibling_id
+            answer_node.next_step = DialogNodeNextStep(context.formal_query_id)
+            result.dialog_nodes.append(answer_node)
+            context.previous_sibling_id = answer_node.dialog_node
+
+    return context.previous_sibling_id
 
 
 def generate_dialog_skill(questions: list[ExcelInput], header: ExcelHeader) -> Skill:
@@ -183,6 +280,6 @@ def generate_dialog_skill(questions: list[ExcelInput], header: ExcelHeader) -> S
         menu_folder_id=menu_folder_id,
         previous_menu_id=None
     )
-    previous_sibling_id = process_level(result, questions, initial_context)
+    previous_sibling_id = process_level(result, questions, header, initial_context)
     add_not_understanding_dialog(result, previous_sibling_id)
-    return result
+    return clean_skill_empty_nodes(result)

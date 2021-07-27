@@ -1,3 +1,5 @@
+from typing import Optional
+
 import utils
 from dialog_skill.text_item import TextItem
 
@@ -25,6 +27,7 @@ class OptionResponse:
 class GenericOutput:
     def __init__(self, response_type: str):
         self.response_type = response_type
+        self.options: Optional[list[OptionResponse]] = None
 
 
 class GenericTextOutput(GenericOutput):
@@ -55,7 +58,7 @@ DIALOG_NODE_NEXT_STEP_SELECTOR_BODY = 'body'
 class DialogNodeNextStep:
     def __init__(self, dialog_node: str):
         self.behavior = DIALOG_NODE_NEXT_STEP_BEHAVIOR_JUMP_TO
-        self.selector = DIALOG_NODE_NEXT_STEP_SELECTOR_BODY,
+        self.selector = DIALOG_NODE_NEXT_STEP_SELECTOR_BODY
         self.dialog_node = dialog_node
 
 
@@ -64,7 +67,7 @@ class DialogNode:
         self.dialog_node = node_id
         self.title = utils.clean_value(title)
         self.type = node_type
-        self.parent = None
+        self.parent: Optional[str] = None
         self.previous_sibling = None
         self.metadata = {}
         self.selection_policy = SELECTION_POLICY_TYPE_SEQUENTIAL
@@ -90,3 +93,10 @@ class StandardDialogNode(DialogNode):
 
     def add_response_options(self, title: str, options: list[OptionResponse]):
         self.output.generic.append(GenericOptionsOutput(title, options))
+
+    def add_options_to_last_response(self, menu_name: str, other_options_text: str):
+        current_menu_answer = self.output.generic[-1]
+        if len(current_menu_answer.options) == 20:
+            current_menu_answer = GenericOptionsOutput(other_options_text)
+            self.output.generic.append(current_menu_answer)
+        current_menu_answer.options.append(OptionResponse(menu_name, menu_name))
