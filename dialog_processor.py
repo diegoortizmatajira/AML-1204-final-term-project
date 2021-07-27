@@ -1,5 +1,9 @@
-from dialog_skill.dialog_node import StandardDialogNode, GenericOptionsOutput, OptionResponse, FolderDialogNode
+from typing import Callable
+
+from dialog_skill.dialog_node import StandardDialogNode, GenericOptionsOutput, OptionResponse, FolderDialogNode, \
+    DialogNode
 from dialog_skill.entity import Entity, EntityValue, ENTITY_VALUE_TYPE_SYNONYMS
+from dialog_skill.intent import Intent
 from dialog_skill.skill import Skill
 from excel_loading import ExcelHeader, ExcelInput
 
@@ -75,10 +79,108 @@ def add_menu_folder(result: Skill, previous_sibling_id: str):
     return new_folder_node.dialog_node, new_folder_node.dialog_node
 
 
+def add_main_menu(result: Skill, previous_sibling_id: str, header: ExcelHeader) -> (str, DialogNode, Entity):
+    main_menu_intention = Intent("Main Menu", "Intention to view the main menu", [
+        "Menu",
+        "What can you do?",
+        "How can you help me?"
+    ])
+    result.intents.append(main_menu_intention)
+
+    main_menu_node = StandardDialogNode(get_node_id(), "Main Menu", f"#{main_menu_intention.name}")
+    main_menu_node.PreviousSiblingId = previous_sibling_id
+    main_menu_node.add_response_options(header.selection_message, [])
+    result.dialog_nodes.append(main_menu_node)
+
+    main_menu_entity = Entity("Opciones_Menu_Principal", [], True)
+    result.entities.append(main_menu_entity)
+
+    return main_menu_node.dialog_node, main_menu_node, main_menu_entity;
+
+
+class ProcessingContext:
+    def __init__(self, level: int, parent_node: DialogNode, previous_sibling_id: str, menu_node: DialogNode,
+                 menu_entity: Entity, formal_query_id: str, menu_folder_id: str, previous_menu_id: str):
+        self.level = level
+        self.parent_node = parent_node
+        self.previous_sibling_id = previous_sibling_id
+        self.menu_node = menu_node
+        self.menu_entity = menu_entity
+        self.formal_query_id = formal_query_id
+        self.menu_folder_id = menu_folder_id
+        self.previous_menu_id = previous_menu_id
+
+    def new_folder_context(self, new_folder: str):
+        NuevoFolder = FolderDialogNode(get_node_id(), new_folder)
+        if self.parent_node:
+            NuevoFolder.parent = self.parent_node
+        NuevoFolder.previous_sibling = self.previous_sibling_id
+
+        return ProcessingContext(
+            level=self.level + 1,
+            parent_node=NuevoFolder,
+            previous_sibling_id=None,
+            menu_node=None,
+            menu_entity=None,
+            formal_query_id=self.formal_query_id,
+            menu_folder_id=self.menu_folder_id,
+            previous_menu_id=None
+        )
+
+
+def get_grouping_criteria(level: int) -> Callable[[ExcelInput], str]:
+    if level == 1:
+        return lambda row: row.Category_1
+    elif level == 2:
+        return lambda row: row.Category_2
+    elif level == 3:
+        return lambda row: row.Category_3
+    elif level == 4:
+        return lambda row: row.Category_4
+    elif level == 4:
+        return lambda row: row.Category_5
+    else:
+        return None
+
+
+def get_groups(questions: list[ExcelInput], criteria: Callable[[ExcelInput], str]) -> dict[str, list[ExcelInput]]:
+    result = {}
+    for question in questions:
+        key = criteria(question)
+        group_list = result.get(key, [])
+        group_list.append(question)
+        result[key] = group_list
+    return result
+
+
+def process_level(result: Skill, questions: list[ExcelInput], context: ProcessingContext) -> str:
+    criteria = get_grouping_criteria(context.level)
+    if criteria:
+        # Get the questions grouped by the values in the category column corresponding to the level
+        groups = get_groups(questions, criteria)
+        for key, group_list in groups.items():
+            if key:
+                new_folder_context = context.new_folder_context(key)
+                result.dialog_nodes.append(new_folder_context.parent_node)
+
+    return ''
+
+
 def generate_dialog_skill(questions: list[ExcelInput], header: ExcelHeader) -> Skill:
     result = Skill(header.name, header.description, 'en')
     previous_sibling_id, formal_query_id = add_initial_dialog(result, header)
     previous_sibling_id, menu_folder_id = add_menu_folder(result, previous_sibling_id)
-
+    previous_sibling_id, main_menu_node, main_menu_entity = add_main_menu(result, previous_sibling_id, header)
+    initial_context = ProcessingContext(
+        level=1,
+        parent_node=None,
+        previous_sibling_id=previous_sibling_id,
+        menu_node=main_menu_node,
+        menu_entity=main_menu_entity,
+        formal_query_id=formal_query_id,
+        menu_folder_id=menu_folder_id,
+        previous_menu_id=None
+    )
+    previous_sibling_id = process_level(result, questions, initial_context)
     add_not_understanding_dialog(result, previous_sibling_id)
     return result
