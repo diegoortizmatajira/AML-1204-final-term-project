@@ -106,7 +106,7 @@ def add_main_menu(result: Skill, previous_sibling_id: str, header: ExcelHeader) 
     result.intents.append(main_menu_intention)
 
     main_menu_node = StandardDialogNode(get_node_id(), "Main Menu", f"#{main_menu_intention.intent}")
-    main_menu_node.PreviousSiblingId = previous_sibling_id
+    main_menu_node.previous_sibling = previous_sibling_id
     main_menu_node.add_response_options(header.selection_message, [])
     result.dialog_nodes.append(main_menu_node)
 
