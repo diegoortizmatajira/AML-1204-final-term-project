@@ -58,12 +58,12 @@ def add_initial_dialog(result: Skill, header: ExcelHeader) -> (str, str):
     result.dialog_nodes.append(service_feedback_node)
 
     formal_query_entity = Entity("formal_query_entity", [
-        EntityValue(ENTITY_VALUE_TYPE_SYNONYMS, "Finish", ["No, thank you", "That's it", "End", "Exit"])
+        EntityValue(ENTITY_VALUE_TYPE_SYNONYMS, "Finish", ["Finish", "No, thank you", "That's it", "End", "Exit"])
     ], True)
     result.entities.append(formal_query_entity)
 
     formal_query_node = StandardDialogNode(get_node_id(), header.formal_offering_message,
-                                           f"@{formal_query_entity.entity}")
+                                           f"@{service_feedback_entity.entity}")
     formal_query_node.parent = service_feedback_node.dialog_node
     formal_query_node.add_response_options(header.formal_offering_message, [
         OptionResponse("Menu", "Menu"),
@@ -192,11 +192,12 @@ def has_menu_options(questions: list[ExcelInput]) -> bool:
     return True
 
 
-def create_menu(result: Skill, header: ExcelHeader, menu_name: str, context: ProcessingContext) -> (DialogNode, Entity):
+def create_menu(result: Skill, header: ExcelHeader, menu_name: str, menu_intention: str,
+                context: ProcessingContext) -> (DialogNode, Entity):
     context.menu_entity.values.append(EntityValue(ENTITY_VALUE_TYPE_SYNONYMS, menu_name, []))
     context.menu_node.add_options_to_last_response(menu_name, header.selection_continuation_message)
 
-    menu_node = StandardDialogNode(get_node_id(), menu_name, f'@{context.menu_entity.entity}:{menu_name}')
+    menu_node = StandardDialogNode(get_node_id(), menu_name, f'#{menu_intention}')
     menu_node.parent = context.menu_node.dialog_node
     menu_node.previous_sibling = context.previous_menu_id
     menu_node.add_response_options(header.selection_message, [])
@@ -225,12 +226,15 @@ def process_level(result: Skill, questions: list[ExcelInput], header: ExcelHeade
             if key:
                 new_folder_context = context.new_folder_context(key)
                 result.dialog_nodes.append(new_folder_context.parent_node)
-                if context.menu_node and context.menu_entity and has_menu_options(group_list):
-                    new_folder_context.menu_node, new_folder_context.menu_entity = create_menu(result, header, key,
-                                                                                               context)
-                    context.previous_menu_id = new_folder_context.menu_node.dialog_node
+
                 menu_intention = Intent(get_menu_intent_id(), key, [key])
                 result.intents.append(menu_intention)
+
+                if context.menu_node and context.menu_entity and has_menu_options(group_list):
+                    new_folder_context.menu_node, new_folder_context.menu_entity = create_menu(result, header, key,
+                                                                                               menu_intention.intent,
+                                                                                               context)
+                    context.previous_menu_id = new_folder_context.menu_node.dialog_node
 
                 link_node = StandardDialogNode(get_node_id(), key, f'#{menu_intention.intent}')
                 link_node.parent = new_folder_context.menu_folder_id
