@@ -13,6 +13,18 @@ class ExcelInput:
     Show_in_menu = ''
     Validation = ''
 
+    def __init__(self,Row,Category_1,Category_2,Category_3,Category_4,Category_5,Question,Answer,Show_in_menu,Validation):
+        self.Row = Row
+        self.Category_1 = Category_1
+        self.Category_2 = Category_2
+        self.Category_3 = Category_3
+        self.Category_4 = Category_4
+        self.Category_5 = Category_5
+        self.Question = Question
+        self.Answer = Answer
+        self.Show_in_menu = Show_in_menu
+        self.Validation = Validation
+
 
 class ExcelHeader:
     name: str = 'Sample chatbot'
@@ -32,17 +44,18 @@ def load_excel_file(filename: str) -> (list[ExcelInput], ExcelHeader):
     excel_rows_list = []
 
     for row in ws.iter_rows():
-        excelInputElement = ExcelInput()
-        excelInputElement.Row = row[0].value
-        excelInputElement.Category_1 = row[1].value
-        excelInputElement.Category_2 = row[2].value
-        excelInputElement.Category_3 = row[3].value
-        excelInputElement.Category_4 = row[4].value
-        excelInputElement.Category_5 = row[5].value
-        excelInputElement.Question = row[6].value
-        excelInputElement.Answer = row[7].value
-        excelInputElement.Show_in_menu = row[8].value
-        excelInputElement.Validation = row[9].value
+        Row = row[0].value
+        Category_1 = row[1].value
+        Category_2 = row[2].value
+        Category_3 = row[3].value
+        Category_4 = row[4].value
+        Category_5 = row[5].value
+        Question = row[6].value
+        Answer = row[7].value
+        Show_in_menu = row[8].value
+        Validation = row[9].value
+
+        excelInputElement = ExcelInput(Row,Category_1,Category_2,Category_3,Category_4,Category_5,Question,Answer,Show_in_menu,Validation)
         excel_rows_list.append(excelInputElement)
 
     return excel_rows_list, ExcelHeader()
