@@ -134,7 +134,7 @@ def add_main_menu(result: Skill, previous_sibling_id: str, header: ExcelHeader) 
     main_menu_node.add_response_options(header.selection_message, [])
     result.dialog_nodes.append(main_menu_node)
 
-    # Creates the main menu optins entity. with no actual values. those will be created after during the
+    # Creates the main menu options entity. with no actual values. those will be created after during the
     # questions processing
     main_menu_entity = Entity('main_menu_options', [], True)
     result.entities.append(main_menu_entity)

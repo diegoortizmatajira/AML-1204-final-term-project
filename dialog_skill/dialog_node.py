@@ -68,7 +68,7 @@ class DialogNode:
         self.title = utils.clean_value(title)
         self.type = node_type
         self.parent: Optional[str] = None
-        self.previous_sibling = None
+        self.previous_sibling: Optional[str] = None
         self.metadata = {}
         self.selection_policy = SELECTION_POLICY_TYPE_SEQUENTIAL
         self.next_step = None
