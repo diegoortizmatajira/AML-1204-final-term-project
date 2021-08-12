@@ -43,4 +43,5 @@ def load_excel_file(filename: str) -> (list[ExcelInput], ExcelHeader):
                                          answer, show_in_menu, validation)
         excel_rows_list.append(excel_input_element)
 
+    # Ignores the first row as it contains the Headers
     return excel_rows_list[1:], ExcelHeader()

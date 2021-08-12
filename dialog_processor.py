@@ -195,15 +195,15 @@ class ProcessingContext:
 # a None value to signal the recursive function to stop processing more levels.
 def get_grouping_criteria(level: int) -> Optional[Callable[[ExcelInput], str]]:
     if level == 1:
-        return lambda row: row.Category_1
+        return lambda row: row.category_1
     elif level == 2:
-        return lambda row: row.Category_2
+        return lambda row: row.category_2
     elif level == 3:
-        return lambda row: row.Category_3
+        return lambda row: row.category_3
     elif level == 4:
-        return lambda row: row.Category_4
+        return lambda row: row.category_4
     elif level == 4:
-        return lambda row: row.Category_5
+        return lambda row: row.category_5
     else:
         return None
 
@@ -224,7 +224,7 @@ def get_groups(questions: list[ExcelInput], criteria: Callable[[ExcelInput], str
 # This function returns if the question list contains any question that should be included in the menu.
 def has_menu_options(questions: list[ExcelInput]) -> bool:
     for question in questions:
-        if not question.Show_in_menu:
+        if not question.show_in_menu:
             return False
     return True
 
@@ -302,17 +302,17 @@ def process_level(result: Skill, questions: list[ExcelInput], header: ExcelHeade
         # If there is no grouping criteria (for example when it is called with level = 9999), it creates the
         # questions' objects (entities, dialog nodes, intentions, etc.)
         for question in questions:
-            if context.menu_node and context.menu_entity and question.Show_in_menu:
+            if context.menu_node and context.menu_entity and question.show_in_menu:
                 # If the question should be in the menu, adds the menu option to the current menu node
-                context.menu_node.add_options_to_last_response(question.Question, header.selection_continuation_message)
+                context.menu_node.add_options_to_last_response(question.question, header.selection_continuation_message)
 
             # Creates the query intent to enable the question to be accessed directly by the user asking the questions
-            question_intent = Intent(get_question_intent_id(), question.Question, [question.Question])
+            question_intent = Intent(get_question_intent_id(), question.question, [question.question])
             result.intents.append(question_intent)
 
             # Creates the dialog node for displaying the answer to the question in response to detecting the intention
-            answer_node = StandardDialogNode(get_node_id(), question.Question, f'#{question_intent.intent}')
-            answer_node.add_response_paragraph(question.Answer)
+            answer_node = StandardDialogNode(get_node_id(), question.question, f'#{question_intent.intent}')
+            answer_node.add_response_paragraph(question.answer)
             if context.parent_node:
                 answer_node.parent = context.parent_node.dialog_node
             answer_node.previous_sibling = context.previous_sibling_id
