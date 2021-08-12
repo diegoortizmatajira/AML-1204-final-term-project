@@ -2,29 +2,19 @@ from openpyxl import load_workbook
 
 
 class ExcelInput:
-    Row = ''
-    Category_1 = ''
-    Category_2 = ''
-    Category_3 = ''
-    Category_4 = ''
-    Category_5 = ''
-    Question = ''
-    Answer = ''
-    Show_in_menu = ''
-    Validation = ''
 
-    def __init__(self, Row, Category_1, Category_2, Category_3, Category_4, Category_5, Question, Answer, Show_in_menu,
-                 Validation):
-        self.Row = Row
-        self.Category_1 = Category_1
-        self.Category_2 = Category_2
-        self.Category_3 = Category_3
-        self.Category_4 = Category_4
-        self.Category_5 = Category_5
-        self.Question = Question
-        self.Answer = Answer
-        self.Show_in_menu = Show_in_menu
-        self.Validation = Validation
+    def __init__(self, row, category_1, category_2, category_3, category_4, category_5, question, answer, show_in_menu,
+                 validation):
+        self.row = row
+        self.category_1 = category_1
+        self.category_2 = category_2
+        self.category_3 = category_3
+        self.category_4 = category_4
+        self.category_5 = category_5
+        self.question = question
+        self.answer = answer
+        self.show_in_menu = show_in_menu
+        self.validation = validation
 
 
 class ExcelHeader:
@@ -45,19 +35,12 @@ def load_excel_file(filename: str) -> (list[ExcelInput], ExcelHeader):
     excel_rows_list = []
 
     for row in ws.iter_rows():
-        Row = row[0].value
-        Category_1 = row[1].value
-        Category_2 = row[2].value
-        Category_3 = row[3].value
-        Category_4 = row[4].value
-        Category_5 = row[5].value
-        Question = row[6].value
-        Answer = row[7].value
-        Show_in_menu = row[8].value
-        Validation = row[9].value
+        row_number, category_1, category_2, category_3, category_4, \
+            category_5, question, answer, show_in_menu, validation = tuple(map(lambda r: r.value, row))
 
-        excelInputElement = ExcelInput(Row, Category_1, Category_2, Category_3, Category_4, Category_5, Question,
-                                       Answer, Show_in_menu, Validation)
-        excel_rows_list.append(excelInputElement)
+        excel_input_element = ExcelInput(row_number, category_1, category_2, category_3, category_4, category_5,
+                                         question,
+                                         answer, show_in_menu, validation)
+        excel_rows_list.append(excel_input_element)
 
     return excel_rows_list[1:], ExcelHeader()
