@@ -5,8 +5,8 @@ from json_writing import write_json_skill
 import sys
 
 # Reads files from the command line
-input_file = (sys.argv[1] if len(sys.argv) >= 2 else None) or 'PlantillaQA.xlsx'
-output_file = (sys.argv[2] if len(sys.argv) >= 3 else None) or 'output.json'
+input_file = sys.argv[1] if len(sys.argv) >= 2 else 'PlantillaQA.xlsx'
+output_file = sys.argv[2] if len(sys.argv) >= 3 else 'output.json'
 
 # Displays usage info
 print('Dialog generator - Tool to transform an Excel file to a IBM Watson Assistant dialog skill')
