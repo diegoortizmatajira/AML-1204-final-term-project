@@ -13,7 +13,8 @@ class ExcelInput:
     Show_in_menu = ''
     Validation = ''
 
-    def __init__(self,Row,Category_1,Category_2,Category_3,Category_4,Category_5,Question,Answer,Show_in_menu,Validation):
+    def __init__(self, Row, Category_1, Category_2, Category_3, Category_4, Category_5, Question, Answer, Show_in_menu,
+                 Validation):
         self.Row = Row
         self.Category_1 = Category_1
         self.Category_2 = Category_2
@@ -55,7 +56,8 @@ def load_excel_file(filename: str) -> (list[ExcelInput], ExcelHeader):
         Show_in_menu = row[8].value
         Validation = row[9].value
 
-        excelInputElement = ExcelInput(Row,Category_1,Category_2,Category_3,Category_4,Category_5,Question,Answer,Show_in_menu,Validation)
+        excelInputElement = ExcelInput(Row, Category_1, Category_2, Category_3, Category_4, Category_5, Question,
+                                       Answer, Show_in_menu, Validation)
         excel_rows_list.append(excelInputElement)
 
-    return excel_rows_list, ExcelHeader()
+    return excel_rows_list[1:], ExcelHeader()
