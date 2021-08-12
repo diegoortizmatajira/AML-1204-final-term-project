@@ -5,7 +5,7 @@ from json_writing import write_json_skill
 import sys
 
 # Reads files from the command line
-input_file = sys.argv[1] if len(sys.argv) >= 2 else 'PlantillaQA.xlsx'
+input_file = sys.argv[1] if len(sys.argv) >= 2 else 'template.xlsx'
 output_file = sys.argv[2] if len(sys.argv) >= 3 else 'output.json'
 
 # Displays usage info
