@@ -101,7 +101,7 @@ def add_not_understanding_dialog(result: Skill, previous_sibling_id: str):
     not_understanding_node = StandardDialogNode(get_node_id(), "Not understanding", "anything_else")
     not_understanding_node.add_response_paragraphs([
         "I haven't understood, Please re-phrase the query.",
-        "Can you use other words? I didn't got what you said",
+        "Can you use other words? I didn't get what you said",
         "Cannot understand the meaning"
     ])
     not_understanding_node.previous_sibling = previous_sibling_id
